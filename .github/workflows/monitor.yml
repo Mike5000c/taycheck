@@ -5,17 +5,12 @@ on:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -39,10 +34,3 @@ jobs:
           local-dir: ./
           include: 'product_cache.json'
           server-dir: /public_html/tay/
-
-      - name: Commit and push cache if updated
-        run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "action@github.com"
-          git add product_cache.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update product cache [skip ci]" && git push)
