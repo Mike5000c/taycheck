@@ -1,0 +1,33 @@
+name: Shopify Drop Monitor
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Runs automatically every 10 minutes
+  workflow_dispatch: # Lets you run it manually whenever you want from the website
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests certifi
+
+      - name: Run script & update cache
+        run: |
+          python shopify_monitor.py
+
+      - name: Commit and push cache if updated
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "action@github.com"
+          git add product_cache.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update product cache [skip ci]" && git push)
