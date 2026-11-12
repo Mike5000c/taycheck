@@ -3,7 +3,10 @@ name: Shopify Drop Monitor
 on:
   schedule:
     - cron: '*/10 * * * *' # Runs automatically every 10 minutes
-  workflow_dispatch: # Lets you run it manually whenever you want from the website
+  workflow_dispatch: # Lets you run it manually anytime from the Actions tab
+
+permissions:
+  contents: write
 
 jobs:
   run-monitor:
@@ -24,6 +27,16 @@ jobs:
       - name: Run script & update cache
         run: |
           python shopify_monitor.py
+
+      - name: Sync product_cache.json to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          include: 'product_cache.json'
+          server-dir: /public_html/tay/
 
       - name: Commit and push cache if updated
         run: |
